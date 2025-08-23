@@ -1,0 +1,1 @@
+DocuScan QA is a lightweight web app by I Tech Solutions that lets teams scan multiple documents, flag GDP issues, and spin up SOP/Work Instruction templates in minutes. We never compromise on quality; customer feedback drives us, and efficient solutions lead to sustainability. Contact: nbelandur@gmail.com
