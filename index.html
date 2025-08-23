@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>I Tech Solutions — DocuScan QA</title>
+<meta content="I Tech Solutions builds simple, powerful SaaS for startups. DocuScan QA scans multiple files, flags GDP errors, and suggests SOP &amp; Work Instruction templates." name="description"/>
+<style>
+    /* ------ Base / Apple-like minimal aesthetic ------ */
+    :root{
+      --bg: #0b0b0c;
+      --panel: #111113;
+      --panel-2: #1b1b1f;
+      --text: #f5f5f7;
+      --muted: #c2c2c7;
+      --accent: #0a84ff; /* Apple blue vibe */
+      --accent-2: #64d2ff; /* subtle gradient partner */
+      --ok: #34c759;
+      --warn: #ff9f0a;
+      --danger: #ff453a;
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --maxw: 1120px;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; 
+      color: var(--text); background: radial-gradient(1000px 700px at 75% -10%, rgba(100,210,255,.12), transparent 60%), var(--bg);
+      line-height:1.5; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    }
+    a{color:inherit; text-decoration:none}
+    img{max-width:100%; height:auto; display:block}
+    .container{max-width: var(--maxw); margin: 0 auto; padding: 0 20px}
+
+    /* ------ Header ------ */
+    header{position: sticky; top:0; z-index: 50; backdrop-filter: blur(10px); background: rgba(11,11,12,.6); border-bottom: 1px solid rgba(255,255,255,.08)}
+    .nav{display:flex; align-items:center; justify-content:space-between; padding: 14px 0}
+    .brand{display:flex; align-items:center; gap:12px; font-weight:600}
+    .logo{width:28px; height:28px; border-radius:9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 14px rgba(10,132,255,.4)}
+    .nav a{opacity:.9}
+    .nav a:hover{opacity:1}
+    .navlinks{display:flex; gap:22px; align-items:center}
+    .cta{padding:10px 14px; border-radius: 999px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#001023; font-weight:700; box-shadow: 0 8px 20px rgba(10,132,255,.35)}
+
+    /* Mobile menu */
+    .menu-btn{display:none; border:1px solid rgba(255,255,255,.15); background:transparent; color:var(--text); border-radius:10px; padding:8px 10px}
+    @media (max-width: 900px){
+      .navlinks{display:none}
+      .menu-btn{display:block}
+      .mobile{display:none; position:absolute; left:0; right:0; top:64px; background: rgba(11,11,12,.95); border-bottom:1px solid rgba(255,255,255,.08)}
+      .mobile a{display:block; padding:16px 22px; border-top:1px solid rgba(255,255,255,.06)}
+      .mobile .cta{margin:14px 22px; display:inline-block}
+    }
+
+    /* ------ Hero ------ */
+    .hero{position:relative; overflow:hidden}
+    .hero .container{display:grid; grid-template-columns: 1.1fr .9fr; gap: 36px; padding: 80px 20px}
+    .kicker{letter-spacing:.18em; text-transform:uppercase; color: var(--muted); font-weight:700; font-size:12px}
+    h1{font-size: clamp(36px, 6vw, 64px); line-height:1.04; margin: 12px 0 16px}
+    .sub{font-size: clamp(16px, 2.2vw, 20px); color:#d9d9dc; max-width: 56ch}
+    .actions{display:flex; gap:12px; margin-top:22px; flex-wrap:wrap}
+    .btn{padding:12px 18px; border-radius: 12px; border:1px solid rgba(255,255,255,.14); background: #161618; color: var(--text); font-weight:600}
+    .btn:hover{border-color: rgba(255,255,255,.28)}
+    .btn.primary{background: linear-gradient(135deg, var(--accent), var(--accent-2)); border: none; color:#001022}
+    .confidence{display:flex; gap:18px; align-items:center; margin-top:20px; color: var(--muted); font-size:14px}
+
+    /* Product mock */
+    .mock{position:relative; background: linear-gradient(180deg, #141417, #0f0f12); border:1px solid rgba(255,255,255,.08); border-radius: 22px; box-shadow: var(--shadow); padding: 18px; min-height: 420px}
+    .mock .tabbar{display:flex; gap:8px; margin-bottom:12px}
+    .dot{width:10px; height:10px; border-radius:50%; background:#ff5f57}
+    .dot.y{background:#ffbd2e}
+    .dot.g{background:#28c840}
+    .mockcard{background: linear-gradient(180deg, #17171a, #121215); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:16px; margin-top:12px}
+    .filepill{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#0f1115; border:1px solid rgba(255,255,255,.08); margin:6px 6px 0 0}
+    .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:#0d1a12; border:1px solid rgba(52,199,89,.35); color: var(--ok); font-weight:600}
+    .flag{display:flex; align-items:center; gap:10px; padding:12px; border-radius:12px; background:#1a1212; border:1px solid rgba(255,69,58,.35); color:#ffb3ae}
+
+    @media (max-width: 900px){
+      .hero .container{grid-template-columns: 1fr; padding-top:42px}
+      .mock{min-height:320px}
+    }
+
+    /* ------ Feature grid ------ */
+    .section{padding: 80px 0}
+    .section h2{font-size: clamp(28px, 4vw, 42px); margin:0 0 12px}
+    .section p.lead{color:#d9d9dc; max-width:70ch}
+
+    .grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:26px}
+    .card{background: linear-gradient(180deg, #151519, #101014); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:20px}
+    .card h3{margin:0 0 8px; font-size:20px}
+    .icon{width:24px; height:24px; display:inline-block; margin-right:8px; vertical-align:bottom}
+
+    @media (max-width: 900px){ .grid{grid-template-columns: 1fr} }
+
+    /* ------ Solutions stripe ------ */
+    .stripe{background: linear-gradient(180deg, #0e0e11, #0a0a0c); border-top:1px solid rgba(255,255,255,.06); border-bottom:1px solid rgba(255,255,255,.06)}
+    .solgrid{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:22px}
+    .sol{border-radius:18px; padding:20px; background: linear-gradient(140deg, rgba(10,132,255,.08), rgba(100,210,255,.05) 60%, transparent); border:1px solid rgba(10,132,255,.18)}
+    @media (max-width: 900px){ .solgrid{grid-template-columns:1fr} }
+
+    /* ------ How it works ------ */
+    .steps{display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-top:22px}
+    .step{background: linear-gradient(180deg, #151519, #101014); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:20px}
+    .num{font-weight:800; font-size:28px; color: var(--accent)}
+    @media (max-width: 900px){ .steps{grid-template-columns:1fr} }
+
+    /* ------ Pricing ------ */
+    .pricing{display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:22px}
+    .tier{background: linear-gradient(180deg, #151519, #101014); border:1px solid rgba(255,255,255,.1); border-radius:20px; padding:22px; position:relative}
+    .tier.best{border-color: rgba(10,132,255,.45); box-shadow: 0 0 0 1px rgba(10,132,255,.25), 0 14px 28px rgba(10,132,255,.15)}
+    .price{font-size:38px; font-weight:800}
+    .small{color: var(--muted)}
+    .tick{color: var(--ok); margin-right:8px}
+    @media (max-width: 900px){ .pricing{grid-template-columns:1fr} }
+
+    /* ------ About & Contact ------ */
+    .about{display:grid; grid-template-columns: 1.2fr .8fr; gap:26px}
+    @media (max-width: 900px){ .about{grid-template-columns:1fr} }
+
+    form{display:grid; gap:12px}
+    input, textarea{background:#0f0f12; border:1px solid rgba(255,255,255,.12); color:var(--text); border-radius:12px; padding:12px 14px; font:inherit}
+    textarea{min-height:120px}
+
+    /* ------ Footer ------ */
+    footer{padding: 36px 0; color: var(--muted); border-top:1px solid rgba(255,255,255,.08)}
+
+    /* ------ Tiny animations ------ */
+    [data-animate]{opacity:0; transform: translateY(10px); transition: .6s ease}
+    [data-animate].in{opacity:1; transform:none}
+  
+/* Enforce single clean header and hide mobile drawer */
+.mobile{display:none!important}
+header .nav{flex-wrap:nowrap}
+header .navlinks{display:flex;flex-wrap:nowrap;white-space:nowrap}
+
+/* --- Simple modal for tab content --- */
+#it_modal_backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:1000}
+#it_modal{max-width:780px;width:92%;background:#111113;border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.45);color:#f5f5f7}
+#it_modal header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+#it_modal h3{margin:0;font-size:20px}
+#it_modal .body{padding:18px 18px 22px;line-height:1.5;color:#d9d9dc}
+#it_modal .body p{margin:0 0 10px}
+#it_modal .close-btn{background:#1a1a1f;border:1px solid rgba(255,255,255,.14);color:#f5f5f7;border-radius:10px;padding:8px 10px;cursor:pointer}
+#it_modal .close-btn:hover{border-color:rgba(255,255,255,.28)}
+</style>
+</head>
+<body>
+<!-- Header -->
+<header>
+<div class="container nav">
+<a aria-label="I Tech Solutions home" class="brand" href="#home">
+<span aria-hidden="true" class="logo"></span>
+<span>I Tech Solutions</span>
+</a>
+<nav aria-label="Primary" class="navlinks"><a href="#product">Product</a><a href="#solutions">Solutions</a><a href="#pricing">Pricing</a><a href="#about">About</a><a href="#contact">Contact</a><a class="cta" href="#cta">Request Early Access</a></nav>
+<button aria-controls="mobileMenu" aria-expanded="false" class="menu-btn">Menu</button>
+</div>
+</header>
+<!-- Hero -->
+<section class="hero" id="home">
+<div class="container">
+<div>
+<div class="kicker">SaaS built for startups</div>
+<h1>DocuScan QA — scan, catch errors, and draft SOPs in minutes.</h1>
+<p class="sub">Upload multiple files at once, run instant OCR + GDP checks (missing signatures, dates, strikethroughs), and generate clean reports. Get suggestive templates to frame SOPs and Work Instructions fast — without the weight of a validated system.</p>
+<div class="actions">
+<a class="btn primary" href="#cta">Try the Demo →</a>
+<a class="btn" href="#how">See how it works</a>
+</div>
+<div class="confidence">
+<span>⚡ Lightweight • 🧩 Easy to adopt • 🔒 Your docs stay yours</span>
+</div>
+</div>
+<div aria-label="Product mockup" class="mock" data-animate="">
+<div class="tabbar"><span class="dot"></span><span class="dot y"></span><span class="dot g"></span></div>
+<div class="mockcard">
+<div style="display:flex; gap:10px; flex-wrap:wrap">
+<span class="filepill">📄 BatchRecord_1250.pdf</span>
+<span class="filepill">📄 COA_07-2025.pdf</span>
+<span class="filepill">📄 WI_Labeling_v3.docx</span>
+<span class="filepill">📄 IncomingInspection_Q3.xlsx</span>
+</div>
+<div style="margin-top:14px; display:grid; grid-template-columns:1fr; gap:12px">
+<div class="flag">❗ Missing signature on page 3 · BMR 1250</div>
+<div class="flag">❗ Date format inconsistent (DD/MM vs MM/DD) · COA</div>
+<div class="flag">❗ Strikethrough not initialed · WI Labeling</div>
+<div class="badge">✔ GDP checks completed</div>
+</div>
+</div>
+<div class="mockcard" style="margin-top:16px">
+<div style="display:flex; align-items:center; justify-content:space-between; gap:16px">
+<div>
+<strong>Suggested templates</strong>
+<div class="small">SOP: Document Control · Work Instruction: Incoming Inspection</div>
+</div>
+<a class="btn primary" href="#cta">Insert Template</a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features -->
+<section class="section container" id="product">
+<h2>Everything you need to clean up docs and move faster.</h2>
+<p class="lead">DocuScan QA is your AI-powered document assistant: scan in bulk, catch GDP issues, export clean reports, and spin up SOPs &amp; Work Instructions using suggestive templates.</p>
+<div class="grid">
+<div class="card" data-animate="">
+<h3>📥 Bulk Upload &amp; OCR</h3>
+<p>Drag in PDFs, DOCX, and images. Optical character recognition reads text, stamps, and hand-filled fields.</p>
+</div>
+<div class="card" data-animate="">
+<h3>🔎 GDP Error Detection</h3>
+<p>Flags missing signatures/dates, inconsistent formats, un-initialed strikethroughs, and blank mandatory fields.</p>
+</div>
+<div class="card" data-animate="">
+<h3>🧩 Suggestive Templates</h3>
+<p>Auto-suggests SOP &amp; Work Instruction skeletons based on doc type to help you draft quickly and consistently.</p>
+</div>
+<div class="card" data-animate="">
+<h3>📝 Export Clean Reports</h3>
+<p>One-click export to Word/PDF with a tidy findings list, evidence snippets, and fix recommendations.</p>
+</div>
+<div class="card" data-animate="">
+<h3>📚 Basic Audit Log</h3>
+<p>Tracks who uploaded, when checks ran, and what was exported — simple, readable, and shareable.</p>
+</div>
+<div class="card" data-animate="">
+<h3>💻 No Validation Required</h3>
+<p>Operates like Excel/Docs — ideal for startups and pre-validation prep. Keep it lightweight and flexible.</p>
+</div>
+</div>
+</section>
+<!-- Solutions -->
+<!-- How it works -->
+<section class="section container" id="how">
+<h2>How it works</h2>
+<div class="steps">
+<div class="step" data-animate="">
+<div class="num">1</div>
+<h3>Upload &amp; Detect</h3>
+<p>Drop multiple files. OCR ingests content and structure. GDP ruleset runs instantly.</p>
+</div>
+<div class="step" data-animate="">
+<div class="num">2</div>
+<h3>Review &amp; Fix</h3>
+<p>See flagged items with page refs. Apply suggestive wording and correct formats fast.</p>
+</div>
+<div class="step" data-animate="">
+<div class="num">3</div>
+<h3>Export &amp; Draft</h3>
+<p>Export a clean report to Word/PDF and insert SOP/WI templates to standardize process.</p>
+</div>
+</div>
+</section>
+<!-- Pricing -->
+<section class="section container" id="pricing">
+<h2>Simple pricing that scales with you.</h2>
+<p class="lead">Start free. Upgrade when you’re ready. Cancel anytime.</p>
+<div class="pricing">
+<div class="tier" data-animate="">
+<div class="small">Free</div>
+<div class="price">€0<span class="small">/mo</span></div>
+<p><span class="tick">✔</span>5 docs / month</p>
+<p><span class="tick">✔</span>Basic OCR</p>
+<p><span class="tick">✔</span>PDF export</p>
+<a class="btn" href="#cta">Get Started</a>
+</div>
+<div class="tier best" data-animate="">
+<div class="small">Startup</div>
+<div class="price">€29<span class="small">/mo</span></div>
+<p><span class="tick">✔</span>200 docs / month</p>
+<p><span class="tick">✔</span>GDP checks &amp; rules</p>
+<p><span class="tick">✔</span>SOP/WI suggestions</p>
+<p><span class="tick">✔</span>Word &amp; PDF export</p>
+<a class="btn primary" href="#cta">Choose Startup</a>
+</div>
+<div class="tier" data-animate="">
+<div class="small">Pro</div>
+<div class="price">€99<span class="small">/mo</span></div>
+<p><span class="tick">✔</span>1000 docs / month</p>
+<p><span class="tick">✔</span>Team seats &amp; roles</p>
+<p><span class="tick">✔</span>Priority support</p>
+<p><span class="tick">✔</span>Basic audit log</p>
+<a class="btn" href="#cta">Go Pro</a>
+</div>
+</div>
+</section>
+<!-- About + Contact -->
+<section class="section container" id="about">
+<div class="about">
+<div>
+<h2>About I Tech Solutions</h2>
+<p class="lead">We believe technology should be simple, powerful, and accessible to everyone. Our mission is to create innovative, user-friendly solutions that make work easier, smarter, and more enjoyable.</p>
+<p>Our motto: <em>Customer trust and feedback drive us forward. We never compromise on quality. Efficient solutions lead to sustainable growth.</em></p>
+<p>We’re starting with DocuScan QA — a focused tool that feels like Excel/Docs, not a heavy validated system. It helps startups and lean teams get organized, fix GDP issues, and draft SOPs/WIs quickly, so they can get back to building.</p>
+<div class="small" style="opacity:.8; margin-top:12px">Disclaimer: DocuScan QA is a lightweight, non-validated tool intended for internal use and pre-validation preparation.</div>
+</div>
+<div id="cta">
+<h2>Request Early Access</h2>
+<form onsubmit="event.preventDefault(); document.getElementById('thanks').style.display='block'; this.reset();">
+<label>
+<span class="small">Name</span>
+<input name="name" placeholder="Your name" required="" type="text"/>
+</label>
+<label>
+<span class="small">Email</span>
+<input name="email" placeholder="you@company.com" required="" type="email"/>
+</label>
+<label>
+<span class="small">Company</span>
+<input name="company" placeholder="Company / Team" type="text"/>
+</label>
+<label>
+<span class="small">How can we help?</span>
+<textarea name="message" placeholder="Tell us about your docs, pain points, and target use."></textarea>
+</label>
+<button class="btn primary" type="submit">Request Access</button>
+<div class="small" id="thanks" style="display:none; color: var(--ok); margin-top:6px">Thanks! We'll get back to you soon.</div>
+</form>
+</div>
+</div>
+</section>
+<section class="section container" id="contact">
+<h2>Contact</h2>
+<p class="lead">Have a question or want a walkthrough? Reach out — we’d love to show you what DocuScan QA can do.</p>
+<div class="grid" style="grid-template-columns: repeat(3,1fr)">
+<div class="card"><h3>📧 Email</h3><p><a href="mailto:nbelandur@gmail.com">nbelandur@gmail.com</a></p></div>
+<div class="card"><h3>🌍 Web</h3><p><a href="#">itechsolutions.ie</a> (coming soon)</p></div>
+</div>
+</section>
+<!-- Footer -->
+<footer>
+<div class="container" style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap">
+<div>© <span id="y"></span> I Tech Solutions Innovation and Technology</div>
+<div><a href="#">Privacy</a> · <a href="#">Terms</a></div>
+</div>
+</footer>
+<script>
+    // mobile menu toggle
+    const btn = document.querySelector('.menu-btn');
+    const mobile = document.getElementById('mobileMenu');
+    btn?.addEventListener('click', () => {
+      const open = mobile.style.display === 'block';
+      mobile.style.display = open ? 'none' : 'block';
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+
+    // in-view animations
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in') })
+    }, {threshold: .18});
+    document.querySelectorAll('[data-animate]').forEach(el => io.observe(el));
+
+    // year
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+<div id="it_modal_backdrop"><div id="it_modal"><header><h3 id="it_modal_title"></h3><button class="close-btn" id="it_modal_close">Close</button></header><div class="body" id="it_modal_body"></div></div></div><script>
+// --- Modal logic for nav tabs ---
+(function(){
+  const map = {
+    product: {
+      title: "Product — DocuScan QA",
+      html: `<p><strong>What it does:</strong> Scan multiple files at once, run instant OCR + GDP checks (signatures, dates, strikethroughs), and suggest SOP & Work Instruction templates.</p>
+             <p><strong>Why:</strong> Make technology simple, fun, and useful so every person in every company can work easier and faster.</p>
+             <p><strong>Highlights:</strong> Bulk import • OCR • GDP rule checks • Clean report export • Suggestive SOP/WI skeletons.</p>`
+    },
+    solutions: {
+      title: "Solutions",
+      html: `<p><strong>Startups:</strong> Lightweight adoption; get documentation tidy without heavy validation.</p>
+             <p><strong>Lean QA Teams:</strong> Consistent outputs and clear structure; audit‑ready.</p>
+             <p><strong>SMEs:</strong> Improve clarity and traceability with minimal overhead.</p>`
+    },
+    pricing: {
+      title: "Pricing",
+      html: `<p><strong>Free:</strong> 5 docs/month</p>
+             <p><strong>Startup:</strong> €29/month</p>
+             <p><strong>Pro:</strong> €99/month</p>`
+    },
+    about: {
+      title: "About I Tech Solutions",
+      html: `<p><strong>Mission:</strong> Make technology available to everyone — fun, innovative, and useful — so people and teams can do their work easier.</p>
+             <p><strong>Motto:</strong> Customer trust and feedback guide us. We never compromise on quality. Efficient working leads to sustainability goals.</p>`
+    },
+    contact: {
+      title: "Contact",
+      html: `<p><strong>Email:</strong> <a href="mailto:nbelandur@gmail.com">nbelandur@gmail.com</a></p>
+             <p><strong>Contact Person:</strong> Nuthan S Belandur</p>`
+    }
+  };
+
+  const backdrop = document.getElementById('it_modal_backdrop');
+  const title = document.getElementById('it_modal_title');
+  const body = document.getElementById('it_modal_body');
+  const close = document.getElementById('it_modal_close');
+
+  function openModal(key){
+    const item = map[key];
+    if(!item) return;
+    title.textContent = item.title;
+    body.innerHTML = item.html;
+    backdrop.style.display = 'flex';
+  }
+  function closeModal(){ backdrop.style.display='none'; }
+
+  close.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e)=>{ if(e.target === backdrop) closeModal(); });
+  window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+  // Attach listeners to nav links
+  const nav = document.querySelector('header nav');
+  if(nav){
+    nav.querySelectorAll('a').forEach(a=>{
+      const href = (a.getAttribute('href')||'').toLowerCase();
+      const key = href.replace('#','');
+      if(['product','solutions','pricing','about','contact'].includes(key)){
+        a.addEventListener('click', (e)=>{
+          e.preventDefault();
+          openModal(key);
+        });
+      }
+    });
+  }
+})();
+</script></body>
+</html>
